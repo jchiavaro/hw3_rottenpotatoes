@@ -21,26 +21,22 @@ Background: movies have been added to database
 
   And I am on the RottenPotatoes home page
 
+
+  Given I check the following ratings: R, PG-13
+  And I uncheck the following ratings: R
+
 Scenario: sort movies alphabetically
-  When I check the following ratings: R, PG-13
-  And I follow "Movie Title"
-  And I press "ratings_submit"
-  And I follow "title_header"
-  Then I should see "Chocolat" before "The Terminator"
-  When I uncheck the following ratings: R
+  When I follow "Movie Title"
   And I press "ratings_submit"
   And I follow "title_header"
   Then I should see "Chocolat" before "The Help"
   
 
 Scenario: sort movies in increasing order of release date
-  When I check the following ratings: G, PG
-  And I follow "Release Date"
+  When I follow "Release Date"
   And I press "ratings_submit"
   And I follow "release_date_header"
-  Then I should see "2001: A Space Odyssey" before "Raiders of the Lost Ark"
-  When I uncheck the following ratings: PG
-  And I press "ratings_submit"
+  Then I should see "Chocolat" before "The Help"
   And I follow "title_header"
-  Then I should see "2001: A Space Odyssey" before "Chicken Run"
+  Then I should see "Chocolat" before "The Help"
 

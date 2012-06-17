@@ -13,25 +13,27 @@ MOVIES = [
   {:title=>'Chicken Run', :rating=> 'G', :release_date=> '21-Jun-2000'}
 ]
 
-
-
 Given /the following movies exist/ do |movies_table|
   movies_table.hashes.each do |movie|
     Movie.create!(movie)
-    # each returned element will be a hash whose key is the table header.
-    # you should arrange to add that movie to the database here.
+  # each returned element will be a hash whose key is the table header.
+  # you should arrange to add that movie to the database here.
   end
 end
 
-#Given /I (un)?check the following ratings: (.*)/
-#end
+Given /I (un)?check the following ratings: (.*)/ do |uncheck, ratings|
+  ratings.split(', ').each do |rating|
+    checkbox = "ratings_#{rating}"
+    uncheck ? uncheck(checkbox) : check(checkbox)
+  end
+end
 
 # Make sure that one string (regexp) occurs before or after another one
 #   on the same page
 
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
-  #  ensure that that e1 occurs before e2.
-  #  page.content  is the entire content of the page as a string.
+#  ensure that that e1 occurs before e2.
+#  page.content  is the entire content of the page as a string.
   p page.body =~ /#.*{e1}.*#{e2}/ , "Wrong order of elements"
 end
 
@@ -39,18 +41,19 @@ end
 #  "When I uncheck the following ratings: PG, G, R"
 #  "When I check the following ratings: G"
 
-When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
-  rating_list.split(', ').each do |rating|
-    checkbox = "ratings_#{rating}"
-    uncheck ? uncheck(checkbox) : check(checkbox)
-  end
-end
+#When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
+# HINT: use String#split to split up the rating_list, then
+#   iterate over the ratings and reuse the "When I check..." or
+#   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+# rating_list.split(', ').each do |rating|
+
+#  checkbox = "ratings_#{rating}"
+# uncheck ? uncheck(checkbox) : check(checkbox)
+#end
+#end
 
 Then /I should( not)? see: (.*)/ do |onpage, movie_titles|
- movie_titles.split(", ").each do |title|
+  movie_titles.split(", ").each do |title|
     if onpage.nil? then
       if page.respond_to? :should
         page.should have_content(title), "missing movie " + title
@@ -63,6 +66,26 @@ Then /I should( not)? see: (.*)/ do |onpage, movie_titles|
       else
         assert_equal false, page.has_content?(title), "this movies should be here " + title
       end
+    end
+  end
+end
+
+Then /I should see (none|all) of the movies/ do |option|
+  size = 0
+  if option == "all"
+    size = Movie.all.size
+  end
+  #page.all('table#movies tr').count.should == size
+  page.has_css?("table#movies tr", :count => size)
+end
+
+When /^I (un)?check all the ratings$/ do | uncheck |
+  Movie.all_ratings.each do | rating  |
+    rating = "ratings_" + rating
+    if uncheck
+      uncheck(rating)
+    else
+      check(rating)
     end
   end
 end
